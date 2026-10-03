@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#05060d">
+<title>haychoconchiudaukhothayem — by tobi</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    width:100%;
+    min-height:100%;
+    background:#05060d;
+    color:#fff;
+    font-family:"Architecture", Arial, Helvetica, sans-serif;
+    overflow:hidden;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+@font-face{
+    font-family:"Architecture";
+    src:local("Architecture");
+    font-display:swap;
+}
+
+/* Ảnh Naruto làm nền */
+.bg{
+    position:fixed;
+    inset:0;
+    background:
+        linear-gradient(90deg,rgba(2,4,12,.82),rgba(2,4,12,.38),rgba(2,4,12,.82)),
+        url("background.jpg") center/cover no-repeat;
+    filter:saturate(1) contrast(1.15);
+    transform:scale(1.04);
+    z-index:0;
+}
+
+.bg::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 50% 45%,transparent 0%,rgba(0,0,0,.18) 45%,rgba(0,0,0,.7) 100%);
+}
+
+/* Hạt bụi ánh sáng */
+.particles{
+    position:fixed;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    overflow:hidden;
+}
+.particle{
+    position:absolute;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:#9cb8ff;
+    box-shadow:0 0 12px #7894ff;
+    opacity:.5;
+    animation:float 8s linear infinite;
+}
+@keyframes float{
+    from{transform:translateY(110vh) translateX(0);opacity:0}
+    15%{opacity:.55}
+    85%{opacity:.35}
+    to{transform:translateY(-15vh) translateX(80px);opacity:0}
+}
+
+.card{
+    position:relative;
+    z-index:2;
+    width:min(920px,92vw);
+    min-height:min(760px,92vh);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:34px 34px 28px;
+    border:1px solid rgba(255,255,255,.14);
+    border-radius:28px;
+    background:rgba(5,7,17,.48);
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+    backdrop-filter:none;
+}
+
+.top{
+    display:flex;
+    align-items:center;
+    gap:22px;
+}
+
+.avatar{
+    width:104px;
+    height:104px;
+    flex:none;
+    border-radius:18px;
+    object-fit:cover;
+    object-position:center top;
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 12px 35px rgba(0,0,0,.5);
+}
+
+.title-wrap{min-width:0}
+
+.title{
+    margin:0;
+    font-size:clamp(23px,4vw,42px);
+    line-height:1.05;
+    letter-spacing:.04em;
+    font-weight:800;
+    text-transform:lowercase;
+}
+
+.by{
+    margin-top:9px;
+    color:#aab4d5;
+    font-size:14px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+}
+
+.lyrics-area{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:35px 5px;
+}
+
+.lyrics{
+    width:100%;
+    max-width:820px;
+}
+
+.lyric{
+    font-family:"Architecture", Arial, Helvetica, sans-serif;
+    min-height:0;
+    opacity:0;
+    transform:translateY(14px) scale(.98);
+    transition:opacity .45s ease,transform .45s ease;
+    font-size:clamp(21px,3.2vw,38px);
+    line-height:1.35;
+    font-weight:700;
+    color:rgba(255,255,255,.45);
+    text-shadow:0 4px 25px rgba(0,0,0,.7);
+}
+
+.lyric.active{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    color:#fff;
+}
+
+.word{
+    display:inline-block;
+    opacity:.25;
+    transform:translateY(5px);
+    transition:opacity .16s linear,transform .16s linear,color .16s linear;
+    margin-right:.24em;
+}
+.word.on{
+    opacity:1;
+    transform:translateY(0);
+    color:#dbe5ff;
+    text-shadow:0 0 20px rgba(121,151,255,.45);
+}
+
+.quote{
+    position:absolute;
+    left:50%;
+    bottom:132px;
+    transform:translateX(-50%);
+    width:90%;
+    text-align:center;
+    color:rgba(255,255,255,.4);
+    font-size:12px;
+    letter-spacing:.12em;
+}
+
+.controls{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding-top:10px;
+}
+
+.play{
+    width:54px;
+    height:54px;
+    border:0;
+    border-radius:50%;
+    cursor:pointer;
+    color:white;
+    background:rgba(110,132,255,.82);
+    box-shadow:0 0 25px rgba(110,132,255,.3);
+    font-size:20px;
+    transition:.2s;
+}
+.play:hover{transform:scale(1.06)}
+
+.progress-wrap{
+    flex:1;
+}
+
+.time{
+    display:flex;
+    justify-content:space-between;
+    color:rgba(255,255,255,.55);
+    font-size:11px;
+    margin-bottom:6px;
+}
+
+.progress{
+    width:100%;
+    height:5px;
+    appearance:none;
+    border-radius:99px;
+    background:rgba(255,255,255,.16);
+    cursor:pointer;
+}
+.progress::-webkit-slider-thumb{
+    appearance:none;
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    background:#b9c7ff;
+    box-shadow:0 0 12px rgba(185,199,255,.7);
+}
+
+.hint{
+    margin-top:12px;
+    text-align:center;
+    color:rgba(255,255,255,.38);
+    font-size:11px;
+}
+
+.volume-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:18px;
+    margin-top:10px;
+}
+.volume-controls button{
+    width:42px;
+    height:32px;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:10px;
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+}
+.volume-controls button:hover{background:rgba(255,255,255,.16)}
+
+.before-tired{
+    position:fixed;
+    inset:0;
+    z-index:25;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+    text-align:center;
+    color:#fff;
+    font-size:clamp(22px,3.5vw,42px);
+    font-weight:700;
+    text-shadow:0 4px 25px rgba(0,0,0,.9);
+    background:rgba(1,3,10,.68);
+    backdrop-filter:none;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .5s ease,visibility .5s ease;
+}
+.before-tired.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+}
+
+.tired-message{
+    align-items:flex-start;
+    padding-top:7vh;
+    z-index:15;
+}
+.tired-message p{
+    font-family:"Architecture", Arial, Helvetica, sans-serif;
+    width:min(900px,88vw);
+    font-size:clamp(16px,2vw,25px);
+    line-height:1.65;
+}
+
+body.tired-mode .lyrics-area{
+    align-items:flex-end;
+    padding-top:160px;
+    padding-bottom:55px;
+}
+body.tired-mode .lyrics{
+    max-width:900px;
+}
+
+body.tired-mode .quote{display:none;}
+
+@media(max-width:600px){
+    .card{
+        min-height:92vh;
+        padding:22px 18px 20px;
+        border-radius:22px;
+    }
+    .top{gap:14px}
+    .avatar{
+        width:72px;
+        height:72px;
+        border-radius:14px;
+    }
+    .title{font-size:22px}
+    .by{font-size:10px;letter-spacing:.18em}
+    .lyrics-area{padding:25px 0 35px}
+    .lyric{font-size:23px}
+    .quote{bottom:105px}
+    #startBtnLeft{left:calc(50% - 150px)}
+    #startBtnRight{right:calc(50% - 150px)}
+    .start-btn{padding:12px 20px;font-size:14px}
+    body.tired-mode .lyrics-area{padding-top:150px;padding-bottom:45px}
+}
+
+
+/* Màn hình bắt đầu */
+.start{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(1,3,10,.74);
+    backdrop-filter:none;
+    transition:opacity .5s ease,visibility .5s ease;
+}
+.start.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+.start-box{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+.start-box h2,
+.start-box p{
+    display:none;
+}
+.start-buttons{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+}
+.start-btn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    border:0;
+    border-radius:999px;
+    padding:13px 28px;
+    color:#fff;
+    background:rgba(104,125,247,.9);
+    cursor:pointer;
+    font-weight:700;
+    font-size:15px;
+    box-shadow:0 8px 28px rgba(0,0,0,.35);
+    transition:transform .2s,background .2s;
+    pointer-events:auto;
+}
+.start-btn:hover{
+    transform:translateY(-50%) scale(1.05);
+    background:rgba(120,140,255,.98);
+}
+#startBtnLeft{left:calc(50% - 165px)}
+#startBtnRight{right:calc(50% - 165px)}
+
+.tired-message{
+    position:fixed;
+    inset:0;
+    z-index:15;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:30px;
+    text-align:center;
+    pointer-events:none;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .7s ease,visibility .7s ease;
+}
+.tired-message.show{
+    opacity:1;
+    visibility:visible;
+}
+.tired-message p{
+    width:min(820px,90vw);
+    margin:0;
+    color:rgba(255,255,255,.94);
+    font-size:clamp(18px,2.4vw,30px);
+    line-height:1.8;
+    font-weight:600;
+    text-shadow:0 4px 25px rgba(0,0,0,.9);
+}
+
+body.tired-mode .tired-message{
+    align-items:flex-start;
+    padding-top:7vh;
+}
+body.tired-mode .tired-message p{
+    width:min(900px,88vw);
+    font-size:clamp(16px,2vw,25px);
+    line-height:1.65;
+}
+
+/* Nút bắt đầu: luôn nhận chuột + cảm ứng */
+.start{pointer-events:auto !important;}
+.start-box,.start-buttons{pointer-events:auto !important;}
+.start-btn{pointer-events:auto !important; z-index:10001 !important; touch-action:manipulation; cursor:pointer !important;}
+/* Nút trở về */
+.back-btn{position:fixed;top:18px;left:18px;z-index:10002;display:none;padding:10px 16px;border:1px solid #fff;border-radius:12px;background:#000;color:#fff;font:inherit;font-size:15px;cursor:pointer;touch-action:manipulation;backdrop-filter:none;}
+.back-btn.show{display:block;}
+@media(max-width:600px){.back-btn{top:12px;left:12px;padding:9px 13px;font-size:14px;}}
+
+/* ===== Tired mode: music2 + no lyric + second message ===== */
+.tired-message{
+    position:fixed;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    padding:10vh 20px 20px;
+    text-align:center;
+    pointer-events:none;
+}
+.tired-message.show{display:flex;pointer-events:auto;}
+.tired-message p{
+    margin:0;
+    width:min(900px,90vw);
+    font-family:"Architecture",Arial,Helvetica,sans-serif;
+    font-size:clamp(18px,2.5vw,32px);
+    line-height:1.55;
+    font-weight:700;
+    color:#fff;
+    text-shadow:0 4px 25px rgba(0,0,0,.9);
+}
+.umm-btn{
+    margin-top:28px;
+    border:0;
+    border-radius:999px;
+    padding:12px 24px;
+    color:#fff;
+    background:rgba(104,125,247,.9);
+    font:700 15px "Architecture",Arial,sans-serif;
+    cursor:pointer;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+    -webkit-tap-highlight-color:transparent;
+}
+.umm-btn:active{transform:scale(.97)}
+body.tired-mode .card{display:none;}
+body.tired-mode .tired-message{display:flex;}
+body.tired-mode .back-btn{display:block;}
+@media(max-width:600px){
+ .tired-message{padding-top:9vh;padding-left:16px;padding-right:16px;}
+ .tired-message p{font-size:clamp(17px,5vw,24px);}
+ .umm-btn{font-size:14px;padding:11px 20px;}
+}
+
+
+.tired-first-btn{
+    border:0;
+    background:transparent;
+    padding:0;
+    margin:0;
+    font-family:"Architecture",Arial,Helvetica,sans-serif;
+    font-size:clamp(18px,2.5vw,32px);
+    line-height:1.55;
+    font-weight:700;
+    color:#fff;
+    text-shadow:0 4px 25px rgba(0,0,0,.9);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+}
+.tired-first-btn:active{transform:scale(.98)}
+
+
+</style>
+</head>
+
+<body>
+<div class="bg"></div>
+<div class="particles" id="particles"></div>
+
+<div class="start" id="start">
+    <div class="start-box">
+        <h2>haychoconchiudaukhothayem</h2>
+        <p>by tobi<br>em on khong?</p>
+        <div class="start-buttons">
+            <button class="start-btn" id="startBtnLeft">em on</button>
+            <button class="start-btn" id="startBtnRight">em met roi</button>
+        </div>
+    </div>
+</div>
+
+<button class="back-btn" id="backBtn" type="button">Back</button>
+
+<div class="before-tired" id="beforeTired">nhung ma</div>
+
+<div class="tired-message" id="tiredMessage">
+    <div class="tired-first-btn" id="tiredText">,𝙘𝙖̉𝙢 𝙤̛𝙣 𝙫𝙞̀ 𝙙𝙖̃ 𝙗𝙪̛𝙤̛́𝙘 𝙫𝙖̀𝙤 𝙩𝙝𝙚̂́ 𝙜𝙞𝙤̛́𝙞 𝙪 𝙖́𝙢 𝙘𝙪̉𝙖 𝙖𝙣𝙝, 𝙝𝙤̂𝙢 𝙣𝙖𝙮 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙢𝙖̣̆𝙩 𝙩𝙧𝙤̛̀𝙞 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙩𝙝𝙪𝙤̣̂𝙘 𝙫𝙚̂̀, 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙡𝙞𝙣𝙝 𝙝𝙤̂̀𝙣 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙠𝙝𝙤̂𝙣𝙜 𝙣𝙖̆́𝙣𝙜</div>
+    <button class="umm-btn" id="ummBtn" type="button">umm nhung ma</button>
+</div>
+
+<main class="card">
+    <div class="top">
+        <img class="avatar" src="avatar.jpg" alt="avatar">
+        <div class="title-wrap">
+            <h1 class="title">haychoconchiudaukhothayem</h1>
+            <div class="by">by tobi</div>
+        </div>
+    </div>
+
+    <section class="lyrics-area">
+        <div class="lyrics" id="lyrics"></div>
+    </section>
+
+    <div class="quote">“anh da nghi la, em se khong. nhung ma....”</div>
+
+    <div>
+        <div class="controls">
+            <button class="play" id="playBtn">▶</button>
+            <div class="progress-wrap">
+                <div class="time">
+                    <span id="current">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+                <input class="progress" id="progress" type="range" min="0" max="100" value="0" step="0.01">
+            </div>
+        </div>
+    </div>
+</main>
+
+<audio id="audio" preload="auto" src="music.mp3"></audio>
+<audio id="tiredAudio" preload="auto" src="music2.mp3"></audio>
+
+<script>
+const audio = document.getElementById("audio");
+const playBtn = document.getElementById("playBtn");
+const start = document.getElementById("start");
+const startBtnLeft = document.getElementById("startBtnLeft");
+const startBtnRight = document.getElementById("startBtnRight");
+const tiredMessage = document.getElementById("tiredMessage");
+const beforeTired = document.getElementById("beforeTired");
+const progress = document.getElementById("progress");
+const current = document.getElementById("current");
+const duration = document.getElementById("duration");
+const lyricsBox = document.getElementById("lyrics");
+
+/*
+  Mốc lyric đã được đặt theo cấu trúc của file music.mp3 bạn gửi.
+  Nếu bản nhạc của bạn có phiên bản khác, chỉ cần chỉnh start/end ở đây.
+*/
+const lyricData = [
+    {start:0.7,  end:3.50, text:"Hmm, anh nói anh yêu em á?"},
+    {start:3.50, end:7.35, text:"Thôi, không đáng đâu!"},
+    {start:7.35, end:8.70, text:"Mình chia tay rồi mà?"},
+    {start:8.70, end:12.95,text:"Anh phải hiểu ý em chứ, uh-hmm"},
+    {start:12.95,end:17.40,text:"Đừng có bi lụy như thế"},
+    {start:17.40,end:21.10,text:"Em mong sau này anh sẽ sống hạnh phúc"},
+    {start:21.10,end:25.00,text:"Đừng vì em mà bỏ lỡ bất cứ tình cảm nào mà em xứng đáng có"},
+    {start:25.00,end:29.40,text:"Sống vì anh đi, coi như em xin anh đấy"},
+    {start:29.40,end:34.00,text:"anh da nghi la, em se khong. nhung ma...."}
+];
+
+function makeLyricHTML(text){
+    return text.split(/\s+/).map(word => `<span class="word">${word}</span>`).join(" ");
+}
+
+lyricData.forEach((item)=>{
+    const el=document.createElement("div");
+    el.className="lyric";
+    el.innerHTML=makeLyricHTML(item.text);
+    lyricsBox.appendChild(el);
+    item.el=el;
+    item.words=[...el.querySelectorAll(".word")];
+});
+
+function formatTime(sec){
+    if(!Number.isFinite(sec)) return "0:00";
+    const m=Math.floor(sec/60);
+    const s=Math.floor(sec%60).toString().padStart(2,"0");
+    return `${m}:${s}`;
+}
+
+function updateLyrics(t){
+    let active=-1;
+
+    lyricData.forEach((item,i)=>{
+        const inside=t>=item.start && t<item.end;
+        item.el.classList.toggle("active",inside);
+        if(inside) active=i;
+    });
+
+    if(active>=0){
+        const item=lyricData[active];
+        const ratio=Math.max(0,Math.min(1,(t-item.start)/(item.end-item.start)));
+        const count=Math.ceil(ratio*item.words.length);
+        item.words.forEach((w,i)=>w.classList.toggle("on",i<count));
+    }
+}
+
+function syncUI(){
+    const t=audio.currentTime || 0;
+    const d=audio.duration || 0;
+    current.textContent=formatTime(t);
+    duration.textContent=formatTime(d);
+    progress.value=d ? (t/d)*100 : 0;
+    updateLyrics(t);
+}
+
+function togglePlay(){
+    if(audio.paused){
+        audio.play();
+    }else{
+        audio.pause();
+    }
+}
+
+playBtn.addEventListener("click",togglePlay);
+
+audio.addEventListener("play",()=>{
+    playBtn.textContent="❚❚";
+});
+audio.addEventListener("pause",()=>{
+    playBtn.textContent="▶";
+});
+audio.addEventListener("timeupdate",syncUI);
+audio.addEventListener("loadedmetadata",syncUI);
+audio.addEventListener("ended",()=>{
+    playBtn.textContent="▶";
+    updateLyrics(0);
+});
+
+progress.addEventListener("input",()=>{
+    if(audio.duration){
+        audio.currentTime=(Number(progress.value)/100)*audio.duration;
+        syncUI();
+    }
+});
+
+async function startMusic(){
+    start.classList.add("hide");
+    try{
+        await audio.play();
+    }catch(e){
+        // Trình duyệt có thể chặn autoplay; nút play phía dưới vẫn dùng được.
+    }
+}
+
+startBtnLeft.addEventListener("click",startMusic);
+
+
+/* Tạo hạt bụi nền */
+const particles=document.getElementById("particles");
+for(let i=0;i<32;i++){
+    const p=document.createElement("span");
+    p.className="particle";
+    p.style.left=Math.random()*100+"%";
+    p.style.animationDelay=(-Math.random()*8)+"s";
+    p.style.animationDuration=(5+Math.random()*7)+"s";
+    p.style.opacity=(.18+Math.random()*.45);
+    particles.appendChild(p);
+}
+</script>
+
+<script>
+(function(){
+  const start = document.getElementById('start');
+  const left = document.getElementById('startBtnLeft');
+  const right = document.getElementById('startBtnRight');
+  const back = document.getElementById('backBtn');
+  const tired = document.getElementById('tiredMessage');
+  const tiredText = document.getElementById('tiredText');
+  const audio = document.getElementById('audio');
+  const tiredAudio = document.getElementById('tiredAudio');
+  const bg = document.querySelector('.bg');
+  const originalBg = bg ? bg.style.background : '';
+  let mode='home';
+
+  function stop(a){
+    if(!a) return;
+    a.pause();
+    try{a.currentTime=0;}catch(e){}
+  }
+
+  function goHome(push=true){
+    mode='home';
+    stop(audio);
+    stop(tiredAudio);
+    if(bg) bg.style.background=originalBg;
+    document.body.classList.remove('tired-mode');
+    tired.classList.remove('show');
+    start.classList.remove('hide');
+    back.classList.remove('show');
+    tiredText.textContent=',𝙘𝙖̉𝙢 𝙤̛𝙣 𝙫𝙞̀ 𝙙𝙖̃ 𝙗𝙪̛𝙤̛́𝙘 𝙫𝙖̀𝙤 𝙩𝙝𝙚̂́ 𝙜𝙞𝙤̛́𝙞 𝙪 𝙖́𝙢 𝙘𝙪̉𝙖 𝙖𝙣𝙝, 𝙝𝙤̂𝙢 𝙣𝙖𝙮 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙢𝙖̣̆𝙩 𝙩𝙧𝙤̛̀𝙞 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙩𝙝𝙪𝙤̣̂𝙘 𝙫𝙚̂̀, 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙡𝙞𝙣𝙝 𝙝𝙤̂̀𝙣 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙠𝙝𝙤̂𝙣𝙜 𝙣𝙖̆́𝙣𝙜';
+    if(push && location.hash) history.pushState({page:'home'},'',location.pathname+location.search);
+  }
+
+  function openOn(push=true){
+    mode='on';
+    stop(tiredAudio);
+    start.classList.add('hide');
+    document.body.classList.remove('tired-mode');
+    tired.classList.remove('show');
+    back.classList.add('show');
+    if(push && location.hash!=='#em-on') history.pushState({page:'on'},'',location.pathname+location.search+'#em-on');
+    audio.play().catch(()=>{});
+  }
+
+  function openTired(push=true){
+    mode='tired';
+    stop(audio);
+    start.classList.add('hide');
+    document.body.classList.add('tired-mode');
+    tired.classList.add('show');
+    back.classList.add('show');
+    tiredText.textContent=',𝙘𝙖̉𝙢 𝙤̛𝙣 𝙫𝙞̀ 𝙙𝙖̃ 𝙗𝙪̛𝙤̛́𝙘 𝙫𝙖̀𝙤 𝙩𝙝𝙚̂́ 𝙜𝙞𝙤̛́𝙞 𝙪 𝙖́𝙢 𝙘𝙪̉𝙖 𝙖𝙣𝙝, 𝙝𝙤̂𝙢 𝙣𝙖𝙮 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙢𝙖̣̆𝙩 𝙩𝙧𝙤̛̀𝙞 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙩𝙝𝙪𝙤̣̂𝙘 𝙫𝙚̂̀, 𝙖𝙣𝙝 𝙩𝙧𝙖̉ 𝙡𝙞𝙣𝙝 𝙝𝙤̂̀𝙣 𝙫𝙚̂̀ 𝙣𝙤̛𝙞 𝙠𝙝𝙤̂𝙣𝙜 𝙣𝙖̆́𝙣𝙜';
+    if(bg) bg.style.background='url("background2.gif") center/cover no-repeat';
+    tiredAudio.volume = audio ? audio.volume : 1;
+    tiredAudio.currentTime=0;
+    tiredAudio.play().catch(()=>{});
+    if(push && location.hash!=='#em-met-roi') history.pushState({page:'tired'},'',location.pathname+location.search+'#em-met-roi');
+  }
+
+  left.addEventListener('click',function(e){
+    e.preventDefault();
+    openOn(true);
+  });
+
+  right.addEventListener('click',function(e){
+    e.preventDefault();
+    openTired(true);
+  });
+
+  back.addEventListener('click',function(e){
+    e.preventDefault();
+    if(mode!=='home') goHome(true);
+  });
+
+  window.addEventListener('popstate',function(){
+    const h=location.hash;
+    if(h==='#em-on') openOn(false);
+    else if(h==='#em-met-roi') openTired(false);
+    else goHome(false);
+  });
+
+  if(bg) bg.style.filter='saturate(1) contrast(1.15)';
+})();
+</script>
+</body>
+</html>
